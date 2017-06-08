@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 import scrapy
+from scrapy.loader import ItemLoader
+from scrapy.loader.processors import TakeFirst
+
+from courses.items import Course
 
 
 class UdacitySpider(scrapy.Spider):
@@ -19,7 +23,7 @@ class UdacitySpider(scrapy.Spider):
             )
     
     def parse_detail(self, response):
-        title = response.xpath("//title/text()").extract_first()
-        yield {
-            'title': title
-        }
+        item_loader = ItemLoader(Course(), response)
+        item_loader.default_output_processor = TakeFirst()
+        item_loader.add_xpath('title', '//title/text()')
+        yield item_loader.load_item()
