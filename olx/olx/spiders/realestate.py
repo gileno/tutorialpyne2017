@@ -4,23 +4,18 @@ import scrapy
 
 class RealestateSpider(scrapy.Spider):
     name = 'realestate'
-    allowed_domains = ['ma.olx.com.br']
+    allowed_domains = ['pe.olx.com.br']
     start_urls = [
-        'http://ma.olx.com.br/imoveis/venda/apartamentos/'
+        'http://pe.olx.com.br/imoveis/venda/apartamentos/'
     ]
 
     def parse(self, response):
-        divs = response.xpath(
-            "//div[@id='main-ad-list']"
+        items = response.xpath(
+            '//ul[@id="main-ad-list"]/li[not(contains(@class, "list_native"))]'
         )
-        divs = divs.xpath(
-            ".//a[contains(@class,'OLXad-list-link')]"
-        )
-        for link in divs:
-            yield scrapy.Request(
-                url=link.xpath("./@href").extract_first(),
-                callback=self.parse_detail
-            )
+        for item in items:
+            url = item.xpath('./a/@href').extract_first()
+            yield scrapy.Request(url=url, callback=self.parse_detail)
     
     def parse_detail(self, response):
         yield {
